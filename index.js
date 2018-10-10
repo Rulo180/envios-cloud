@@ -100,24 +100,30 @@ var handler = function(event, context, callback) {
 
           break;
         case "/envios/{idEnvio}/movimiento":
-          let idEnvio2 = (event.pathParameters || {}).idEnvio2 || false;
+          // console.log('Entro al ENDPOINT')
+          let idEnvio = (event.pathParameters || {}).idEnvio || false;
           let body = JSON.parse(event.body);
           let movimiento = body;
+          console.log(idEnvio)
+          console.log(movimiento)
           docClient.get(
             {
               TableName: "Envio",
-              Key: { id: idEnvio2 }
+              Key: { id: idEnvio }
             },
             function(err, data) {
               if (err) {
+                console.log('ENTRO AL ERR',data)
                 callback(null, {
                   statusCode: 500,
                   body: JSON.stringify(err)
                 });
               } else {
-                if (!data.historial) data.historial = [];
+                let envio = data.Item
+                if (!envio.historial) envio.historial = [];
                 movimiento.fecha = new Date().toISOString();
-                data.historial.push(movimiento);
+                envio.historial.push(movimiento);
+                console.log('Movimiento:',movimiento)
                 docClient.put(
                   {
                     TableName: "Envio",
@@ -125,6 +131,7 @@ var handler = function(event, context, callback) {
                   },
                   function(err, data) {
                     if (err) {
+                      console.log(data)
                       callback(null, {
                         statusCode: 500,
                         body: JSON.stringify(err)
