@@ -104,8 +104,6 @@ var handler = function(event, context, callback) {
           let idEnvio = (event.pathParameters || {}).idEnvio || false;
           let body = JSON.parse(event.body);
           let movimiento = body;
-          console.log(idEnvio)
-          console.log(movimiento)
           docClient.get(
             {
               TableName: "Envio",
@@ -154,54 +152,15 @@ var handler = function(event, context, callback) {
           // 2) borrar atributo pendiente
           // 3) put para guardar
 
-          let idEnvio3 = (event.pathParameters || {}).idEnvio3 || false;
+          let idEnvio = (event.pathParameters || {}).idEnvio || false;
           let EnvioGet;
           var params3 = {
             TableName: "Envio",
-            Key: { id: idEnvio3 }
+            Key: { id: idEnvio }
           };
-          docClient.get(params3, function(err, data) {
-            if (err) {
-              callback(null, {
-                statusCode: 500,
-                body: JSON.stringify(err)
-              });
-            } else {
-              callback(null, {
-                statusCode: 201,
-                body: JSON.stringify(data)
-              }),
-                docClient.update(params, function(err, data) {
-                  if (err) ppJson(err);
-                  // an error occurred
-                  else ppJson(data); // successful response
-                });
-            }
-          });
 
-          // docClient.update({
-          //   TableName: 'Envio',
-          //   Key:{
-          //     'id':EnvioGet.id
-          //   },
-          //   UpdateExpression: 'delete pendiente = :p',
-          //   ExpressionAttributeValues:{
-          //     ':p':[EnvioGet.pendiente]
-          //   },
-          //   ReturnValues:"UPDATED_NEW"
 
-          // }, function(err, data) {
-          //   if (err) {
-          //     callback(null, {
-          //       statusCode: 500, body: JSON.stringify(err)
-          //     });
-          //   } else {
-          //     callback(null, {
-          //       statusCode: 201,
-          //       body: JSON.stringify(item)
-          //     })
-          //   }
-          // });
+
 
           break;
       }
