@@ -147,21 +147,45 @@ var handler = function(event, context, callback) {
           );
           break;
         case "/envios/{idEnvio}/entregado":
-          // marcar entregado
-          // 1) traer por id
-          // 2) borrar atributo pendiente
-          // 3) put para guardar
-
-          let idEnvio = (event.pathParameters || {}).idEnvio || false;
-          let EnvioGet;
-          var params3 = {
-            TableName: "Envio",
-            Key: { id: idEnvio }
-          };
-
-
-
-
+		  // marcar entregado
+		  let idEnvio = (event.pathParameters || {}).idEnvio || false;
+		  let params = {
+			TableName: 'Envio',
+			Key: {
+			  id: idEnvio || false,
+			},
+			ConsistentRead: false,
+			ReturnConsumedCapacity: 'NONE',
+		  };
+		  docClient.get(
+			params,
+			function(error, data) {
+				if (error) {
+					callback(null, {
+						statusCode: 500,
+						body: JSON.stringify(err)
+					});
+				} else {
+					let params = {
+						TableName: 'Envio',
+						Key: {
+						  id: idEnvio || false,
+						},
+						UpdateExpression: 'set #historial = list_append(if_not_exists(#historial, :empty_list), :movimiento) remove #pendiente',
+						ExpressionAttributeNames: {
+						  '#historial': 'historial',
+						  '#pendiente': 'pendiente'
+						},
+						ExpressionAttributeValues: { 
+						  ':movimiento': [{fecha:new Date().toISOString(),descripcion:"Entregado"}],
+						  ':empty_list': []
+						},
+						ReturnValues: 'ALL_NEW'
+					  };
+					docClient.update(params, functionDefault);
+				}
+			}
+		  );
           break;
       }
       break;
